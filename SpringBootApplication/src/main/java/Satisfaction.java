@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -23,9 +24,9 @@ public class Satisfaction {
 
 	int t;
 	ArrayList Items = new ArrayList();
-	StringBuffer ItemsToEat=new StringBuffer();
-
-	
+	StringBuffer ItemsToEat = new StringBuffer();
+	int itemDesc[];
+	int val[];
 
 	/**
 	 * Method to check get the amount of time available and to list the items
@@ -34,10 +35,6 @@ public class Satisfaction {
 	 * 
 	 */
 	public int checkSatisfaction(int t) {
-		
-		
-		 
-		
 
 		System.out.println("entered value:" + t);
 		this.t = t;
@@ -53,14 +50,17 @@ public class Satisfaction {
 			// display Menu
 
 			Iterator iterator = Items.iterator();
-			//System.out.println("Menu");
-		//	while (iterator.hasNext()) {
-		//		System.out.println(((Item) iterator.next()).toString());
-		//	}
+			// System.out.println("Menu");
+			// while (iterator.hasNext()) {
+			// System.out.println(((Item) iterator.next()).toString());
+			// }
 
 			// finding the best list if Items
-//return 1000;
-			return CompareItemsWithTime();
+			// return 1000;
+
+			return knapsack(itemDesc, val, t);
+
+			// old return CompareItemsWithTime();
 		}
 
 	}
@@ -70,12 +70,12 @@ public class Satisfaction {
 	 * 
 	 */
 	public void getItems() {
-		
-		
+
 		Properties prop = new Properties();
 		String propFileName = "config.properties";
 
-		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+		InputStream inputStream = getClass().getClassLoader()
+				.getResourceAsStream(propFileName);
 
 		if (inputStream != null) {
 			try {
@@ -86,14 +86,14 @@ public class Satisfaction {
 			}
 		} else {
 			try {
-				throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+				throw new FileNotFoundException("property file '"
+						+ propFileName + "' not found in the classpath");
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		
-		
+
 		BufferedReader br = null;
 		Item item = null;
 
@@ -102,12 +102,21 @@ public class Satisfaction {
 			Object sCurrentLine;
 			StringTokenizer tokens = null;
 
-			br = new BufferedReader(new FileReader(prop.getProperty("filepath")));
-
+			br = new BufferedReader(
+					new FileReader(prop.getProperty("filepath")));
+			int index = 0;
+			final int lineCount = getLineCount(new FileReader(
+					prop.getProperty("filepath")));
+			itemDesc = new int[lineCount];
+			val = new int[lineCount];
 			while ((sCurrentLine = br.readLine()) != null) {
 				tokens = new StringTokenizer(sCurrentLine.toString(), " ");
-				item = new Item(tokens.nextToken(), tokens.nextToken());
-				Items.add(item);
+				itemDesc[index] = Integer.parseInt(tokens.nextToken());
+				val[index++] = Integer.parseInt(tokens.nextToken());
+
+				// item = new Item(tokens.nextToken(), tokens.nextToken());
+				// Items.add(item);
+
 			}
 
 		} catch (Exception e) {
@@ -139,12 +148,12 @@ public class Satisfaction {
 					break;
 				}
 
-				 System.out.println("Item No: " + index + ":"
-				 + tempItem.toString());
-				 
-				 ItemsToEat.append("<BR>Item No: " + index + ":"
-				 + tempItem.toString());
-				 
+				System.out.println("Item No: " + index + ":"
+						+ tempItem.toString());
+
+				ItemsToEat.append("<BR>Item No: " + index + ":"
+						+ tempItem.toString());
+
 				totalSatisfaction += tempItem.getSatisfaction();
 				t = t - tempItem.getTime();
 				itemsSelected++;
@@ -154,8 +163,70 @@ public class Satisfaction {
 
 		System.out.println("Maximum satisfaction recieved is:"
 				+ totalSatisfaction);
-			return totalSatisfaction;
+		return totalSatisfaction;
 
+	}
+	
+	/**
+	 * Method to check get the amount of time available and to list the items
+	 * which can be consumed to get the maximum satisfaction in the time
+	 * provided by using the knapsack algorithm
+	 * 
+	 */
+
+	public static int knapsack(int val[], int wt[], int W) {
+		int N = wt.length; 
+		int[][] V = new int[N + 1][W + 1]; 
+		
+		for (int col = 0; col <= W; col++) {
+			V[0][col] = 0;
+		}
+		// fill the row with 0 when you do not have any items
+		for (int row = 0; row <= N; row++) {
+			V[row][0] = 0;
+		}
+		for (int item = 1; item <= N; item++) {
+			// update the values
+			for (int time = 1; time <= W; time++) {
+				// check the sstisfaction
+				if (wt[item - 1] <= time) {
+					// Given a satisfaction, check if the value of the current item +
+					// value of the item that we could afford with the remaining
+					// time is greater than the value without the current item itself
+					V[item][time] = Math.max(val[item - 1]
+							+ V[item - 1][time - wt[item - 1]],
+							V[item - 1][time]);
+				} else {
+					// If the current item's weight is more than the running
+					// weight, just carry forward the value without the current
+					// item
+					V[item][time] = V[item - 1][time];
+				}
+			}
+		}
+	
+		return V[N][W];
+	}
+
+	public int getLineCount(FileReader fr) {
+		int linenumber = 0;
+		try {
+
+			LineNumberReader lnr = new LineNumberReader(fr);
+
+			
+
+			while (lnr.readLine() != null) {
+				linenumber++;
+			}
+
+			lnr.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return linenumber;
 	}
 
 }

@@ -33,11 +33,6 @@ public class SatisfactionCalculator {
     }
     //http://localhost:8080/getData?data=002
    
-    
-  
-    
-    
-    
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(SatisfactionCalculator.class, args);
