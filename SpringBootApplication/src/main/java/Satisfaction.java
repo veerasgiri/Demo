@@ -176,14 +176,14 @@ public class Satisfaction {
 
 	public static int knapsack(int val[], int wt[], int W) {
 		int N = wt.length; 
-		int[][] V = new int[N + 1][W + 1]; 
+		int[][] values = new int[N + 1][W + 1]; 
 		
 		for (int col = 0; col <= W; col++) {
-			V[0][col] = 0;
+			values[0][col] = 0;
 		}
 		// fill the row with 0 when you do not have any items
 		for (int row = 0; row <= N; row++) {
-			V[row][0] = 0;
+			values[row][0] = 0;
 		}
 		for (int item = 1; item <= N; item++) {
 			// update the values
@@ -193,19 +193,19 @@ public class Satisfaction {
 					// Given a satisfaction, check if the value of the current item +
 					// value of the item that we could afford with the remaining
 					// time is greater than the value without the current item itself
-					V[item][time] = Math.max(val[item - 1]
-							+ V[item - 1][time - wt[item - 1]],
-							V[item - 1][time]);
+					values[item][time] = Math.max(val[item - 1]
+							+ values[item - 1][time - wt[item - 1]],
+							values[item - 1][time]);
 				} else {
 					// If the current item's weight is more than the running
 					// weight, just carry forward the value without the current
 					// item
-					V[item][time] = V[item - 1][time];
+					values[item][time] = values[item - 1][time];
 				}
 			}
 		}
 	
-		return V[N][W];
+		return values[N][W];
 	}
 
 	public int getLineCount(FileReader fr) {
