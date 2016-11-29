@@ -3,6 +3,7 @@
  */
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -24,9 +25,10 @@ public class Satisfaction {
 
 	int t;
 	ArrayList Items = new ArrayList();
-	StringBuffer ItemsToEat = new StringBuffer();
+	 StringBuffer ItemsToEat = new StringBuffer();
 	int itemDesc[];
 	int val[];
+	long totalSatisfaction=0;
 
 	/**
 	 * Method to check get the amount of time available and to list the items
@@ -34,13 +36,15 @@ public class Satisfaction {
 	 * provided
 	 * 
 	 */
-	public int checkSatisfaction(int t) {
+	public long checkSatisfaction(int t) {
 
-		System.out.println("entered value:" + t);
+		//System.out.println("entered value:" + t);
 		this.t = t;
+		
+		ItemsToEat.append("<table border=1><th>Item No</th><th>Time to consume</th><th>Satisfaction</th></tr>");
 
 		if (t == 0) {
-			System.out.println("Not a valid No");
+			//System.out.println("Not a valid No");
 			throw new RuntimeException();
 		} else {
 			getItems();
@@ -57,8 +61,9 @@ public class Satisfaction {
 
 			// finding the best list if Items
 			// return 1000;
-
-			return knapsack(itemDesc, val, t);
+			solve(val,itemDesc,t,val.length-1);
+			
+			return totalSatisfaction;
 
 			// old return CompareItemsWithTime();
 		}
@@ -71,7 +76,7 @@ public class Satisfaction {
 	 */
 	public void getItems() {
 
-		Properties prop = new Properties();
+		/*Properties prop = new Properties();
 		String propFileName = "config.properties";
 
 		InputStream inputStream = getClass().getClassLoader()
@@ -92,7 +97,7 @@ public class Satisfaction {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		}*/
 
 		BufferedReader br = null;
 		Item item = null;
@@ -102,20 +107,25 @@ public class Satisfaction {
 			Object sCurrentLine;
 			StringTokenizer tokens = null;
 
+			//br = new BufferedReader(
+				//	new FileReader(prop.getProperty("filepath")));
 			br = new BufferedReader(
-					new FileReader(prop.getProperty("filepath")));
+				new FileReader(new File("c:/data.txt")));
+			
 			int index = 0;
 			final int lineCount = getLineCount(new FileReader(
-					prop.getProperty("filepath")));
+					new File("c:/data.txt")));
 			itemDesc = new int[lineCount];
 			val = new int[lineCount];
 			while ((sCurrentLine = br.readLine()) != null) {
 				tokens = new StringTokenizer(sCurrentLine.toString(), " ");
-				itemDesc[index] = Integer.parseInt(tokens.nextToken());
-				val[index++] = Integer.parseInt(tokens.nextToken());
+				
 
-				// item = new Item(tokens.nextToken(), tokens.nextToken());
-				// Items.add(item);
+				 item = new Item(tokens.nextToken(), tokens.nextToken());
+				 Items.add(item);
+				 
+				 itemDesc[index] = (int) item.getSatisfaction();
+					val[index++] = item.getTime();
 
 			}
 
@@ -131,9 +141,9 @@ public class Satisfaction {
 	 * 
 	 */
 	public int CompareItemsWithTime() {
-		System.out
-				.println("Items To Eat to get Maximum saticfaction with the time of :"
-						+ t + " are:");
+		//System.out
+			//	.println("Items To Eat to get Maximum saticfaction with the time of :"
+				//		+ t + " are:");
 		Iterator iterator = Items.iterator();
 		Item tempItem = null;
 		int index = 1;
@@ -148,8 +158,8 @@ public class Satisfaction {
 					break;
 				}
 
-				System.out.println("Item No: " + index + ":"
-						+ tempItem.toString());
+			//	System.out.println("Item No: " + index + ":"
+				//		+ tempItem.toString());
 
 				ItemsToEat.append("<BR>Item No: " + index + ":"
 						+ tempItem.toString());
@@ -161,8 +171,8 @@ public class Satisfaction {
 			index++;
 		}
 
-		System.out.println("Maximum satisfaction recieved is:"
-				+ totalSatisfaction);
+		//System.out.println("Maximum satisfaction recieved is:"
+		//		+ totalSatisfaction);
 		return totalSatisfaction;
 
 	}
@@ -174,39 +184,8 @@ public class Satisfaction {
 	 * 
 	 */
 
-	public static int knapsack(int val[], int wt[], int W) {
-		int N = wt.length; 
-		int[][] values = new int[N + 1][W + 1]; 
-		
-		for (int col = 0; col <= W; col++) {
-			values[0][col] = 0;
-		}
-		// fill the row with 0 when you do not have any items
-		for (int row = 0; row <= N; row++) {
-			values[row][0] = 0;
-		}
-		for (int item = 1; item <= N; item++) {
-			// update the values
-			for (int time = 1; time <= W; time++) {
-				// check the sstisfaction
-				if (wt[item - 1] <= time) {
-					// Given a satisfaction, check if the value of the current item +
-					// value of the item that we could afford with the remaining
-					// time is greater than the value without the current item itself
-					values[item][time] = Math.max(val[item - 1]
-							+ values[item - 1][time - wt[item - 1]],
-							values[item - 1][time]);
-				} else {
-					// If the current item's weight is more than the running
-					// weight, just carry forward the value without the current
-					// item
-					values[item][time] = values[item - 1][time];
-				}
-			}
-		}
+
 	
-		return values[N][W];
-	}
 
 	public int getLineCount(FileReader fr) {
 		int linenumber = 0;
@@ -228,5 +207,50 @@ public class Satisfaction {
 
 		return linenumber;
 	}
+	
+	
+	
+	
+	public void solve(int[] wt, int[] val, int W, int N)
+    {
+        int NEGATIVE_INFINITY = Integer.MIN_VALUE;
+        int[][] m = new int[N + 1][W + 1];
+        int[][] sol = new int[N + 1][W + 1];
+ 
+        for (int i = 1; i <= N; i++)
+        {
+            for (int j = 0; j <= W; j++)
+            {
+                int m1 = m[i - 1][j];
+                int m2 = NEGATIVE_INFINITY; 
+                if (j >= wt[i])
+                    m2 = m[i - 1][j - wt[i]] + val[i];
+                /** select max of m1, m2 **/
+                m[i][j] = Math.max(m1, m2);
+                sol[i][j] = m2 > m1 ? 1 : 0;
+            }
+        }        
+        /** make list of what all items to finally select **/
+        int[] selected = new int[N + 1];
+        for (int n = N, w = W; n > 0; n--)
+        {
+            if (sol[n][w] != 0)
+            {
+                selected[n] = 1;
+                w = w - wt[n];
+            }
+            else
+                selected[n] = 0;
+        }
+        /** Print finally selected items **/
+              for (int i = 1; i < N + 1; i++)
+            if (selected[i] == 1){
+              //  System.out.print(i +" ");
+                totalSatisfaction+=val[i];
+                ItemsToEat.append("<tr><th>"+i+"</th><th>"+wt[i] + "</th><th>"+val[i]+"</th></tr>");
+            }
+        
+        ItemsToEat.append("</tr></table>");
+    }
 
 }

@@ -4,14 +4,14 @@
  */
 
 public class Item implements Comparable {
-	private int satisfaction;
+	private long satisfaction;
 	private int time;
 
-	public int getSatisfaction() {
+	public long getSatisfaction() {
 		return satisfaction;
 	}
 
-	public void setSatisfacion(int satisfaction) {
+	public void setSatisfacion(long satisfaction) {
 		this.satisfaction = satisfaction;
 	}
 
@@ -24,7 +24,7 @@ public class Item implements Comparable {
 	}
 	
 	public Item(Object description, Object time){
-		this.satisfaction=Integer.parseInt(description.toString());
+		this.satisfaction=Long.parseLong(description.toString());
 		this.time=Integer.parseInt(time.toString());
 		
 	}

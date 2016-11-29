@@ -24,7 +24,7 @@ public class SatisfactionCalculator {
     	}
     	
     	Satisfaction satisfaction = new Satisfaction();
-    	int val=satisfaction.checkSatisfaction(Integer.parseInt(itemid));
+    	long val=satisfaction.checkSatisfaction(Integer.parseInt(itemid));
 //        return "Data!"+val ;
         Object ItemsToEatAre= "The Maximum Satisfaction that can be achieved in given time <b>" +itemid+"</b> is <b>"+ val +"</b> <br>";
     	return ItemsToEatAre.toString() + "<br>"+satisfaction.ItemsToEat.toString();
